@@ -8,7 +8,6 @@ const sceneElements = {
 };
 
 var key1 = false, key2 = false, key3 = false, key4 = false, turn = 0, rand = 0;
-//const reroll = [4, 8, 14];
 
 helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
@@ -16,7 +15,6 @@ requestAnimationFrame(computeFrame);
 
 // Event Listeners
 window.addEventListener('resize', resizeWindow);
-
 document.addEventListener('keydown', onDocumentKeyDown, false);
 
 function resizeWindow(eventParam) {
@@ -114,7 +112,6 @@ function moveGray(spaces,p,q){
     }
     p.pos += spaces;
     collisionBlueTest(p,q);
-
 }
 
 function moveBlue(spaces,p,q){
@@ -144,8 +141,18 @@ function moveBlue(spaces,p,q){
         i++;
     }
     p.pos += spaces;
-    collisionGrayTest(p,q);
-       
+    collisionGrayTest(p,q);   
+}
+
+function makeBox(width,height,depth,material,x,y,z,obj){
+	var boardGeometry = new THREE.BoxGeometry(width, height, depth);
+    var board = new THREE.Mesh( boardGeometry, material );
+	
+	board.translateX(x).translateY(y).translateZ(z);
+    board.castShadow = true;
+    board.receiveShadow = true;
+	
+    obj.add(board);
 }
 
 function load3DObjects(sceneGraph) {
@@ -153,7 +160,7 @@ function load3DObjects(sceneGraph) {
     // ************************** //
     // Create the Plane
     // ************************** //
-
+	
     var planeGeometry = new THREE.BoxGeometry( 250,0.1, 250 );
     var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x35654D} );
     var plane = new THREE.Mesh( planeGeometry, planeMaterial );
@@ -162,38 +169,20 @@ function load3DObjects(sceneGraph) {
     sceneGraph.add( plane );
 
     plane.receiveShadow = true;
-    
+	
     // ************************** //
     // Create the Board (Bottom)
     // ************************** //
-    var boardGeometry = new THREE.BoxGeometry(45, 6, 34);
+
     var boardMaterial = new THREE.MeshPhongMaterial( {color: 0x98633B} );
-    var board = new THREE.Mesh( boardGeometry, boardMaterial );
-    sceneGraph.add(board);
-
-    board.translateX(-21.5).translateY(3).translateZ(0);
-    board.castShadow = true;
-    board.receiveShadow = true;
-
-    boardGeometry = new THREE.BoxGeometry(21, 6, 12);
-    board = new THREE.Mesh( boardGeometry, boardMaterial );
-    sceneGraph.add(board);
-
-    board.translateX(11.5).translateY(3).translateZ(0);
-    board.castShadow = true;
-    board.receiveShadow = true;
-
-    boardGeometry = new THREE.BoxGeometry(23, 6, 34);
-    board = new THREE.Mesh( boardGeometry, boardMaterial );
-    sceneGraph.add(board);
-
-    board.translateX(33.5).translateY(3).translateZ(0);
-    board.castShadow = true;
-    board.receiveShadow = true;
+	makeBox(45,6,34,boardMaterial,-21.5,3,0,sceneGraph);
+	makeBox(21,6,12,boardMaterial,11.5,3,0,sceneGraph);
+	makeBox(23,6,34,boardMaterial,33.5,3,0,sceneGraph);
 
     // ************************** //
     // Create the TABLE 
     // ************************** //
+	
     var tableGeometry = new THREE.BoxGeometry(250, 10, 250);
     var tableMaterial = new THREE.MeshPhongMaterial( {color: 0x764119} );
     var table = new THREE.Mesh( tableGeometry, tableMaterial );
@@ -201,38 +190,10 @@ function load3DObjects(sceneGraph) {
 
     table.translateX(0).translateY(-5.1).translateZ(0);
     table.receiveShadow = true;
-
-    var tableGeometry = new THREE.BoxGeometry(25, 14, 300);
-    var table = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add(table);
-
-    table.translateX(-136.5).translateY(-3.1).translateZ(0);
-    table.castShadow = true;
-    table.receiveShadow = true;
-
-    var tableGeometry = new THREE.BoxGeometry(25, 14, 300);
-    var table = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add(table);
-
-    table.translateX(136.5).translateY(-3.1).translateZ(0);
-    table.castShadow = true;
-    table.receiveShadow = true;
-
-    var tableGeometry = new THREE.BoxGeometry(250, 14, 35);
-    var table = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add(table);
-
-    table.translateX(0).translateY(-3.1).translateZ(-132.5);
-    table.castShadow = true;
-    table.receiveShadow = true;
-
-    var tableGeometry = new THREE.BoxGeometry(250, 14, 35);
-    var table = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add(table);
-
-    table.translateX(0).translateY(-3.1).translateZ(132.5);
-    table.castShadow = true;
-    table.receiveShadow = true;
+	
+	makeBox(25,14,300,tableMaterial,-136.5,-3.1,0,sceneGraph);
+	makeBox(250,14,35,tableMaterial,0,-3.1,-132.5,sceneGraph);
+	makeBox(250,14,35,tableMaterial,0,-3.1,132.5,sceneGraph);
 
     var tableGeometry = new THREE.CylinderGeometry( 20, 10, 200, 4 );
     var leg = new THREE.Mesh( tableGeometry, tableMaterial );
@@ -274,129 +235,25 @@ function load3DObjects(sceneGraph) {
     // Create the Board (Grid)
     // ************************** //
 
-    var gridGeometry = new THREE.BoxGeometry(44, 1, 1);
 	var gridMaterial = new THREE.MeshPhongMaterial( {color: 0xDEB886} );
-	var grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(-21.5).translateY(6.5).translateZ(-16.5);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(44, 1, 1);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(-21.5).translateY(6.5).translateZ(16.5);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(88, 1, 1);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(0).translateY(6.5).translateZ(5.5);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(88, 1, 1);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(0).translateY(6.5).translateZ(-5.5);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(23, 1, 1);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(33.5).translateY(6.5).translateZ(16.5);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(23, 1, 1);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(33.5).translateY(6.5).translateZ(-16.5);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
+	makeBox(44,1,1,gridMaterial,-21.5,6.5,-16.5,sceneGraph);
+	makeBox(44,1,1,gridMaterial,-21.5,6.5,16.5,sceneGraph);
+	makeBox(88,1,1,gridMaterial,0,6.5,-5.5,sceneGraph);
+	makeBox(88,1,1,gridMaterial,0,6.5,5.5,sceneGraph);
+	makeBox(23,1,1,gridMaterial,33.5,6.5,-16.5,sceneGraph);
+	makeBox(23,1,1,gridMaterial,33.5,6.5,16.5,sceneGraph);
 
     // vertical lines
-
-    gridGeometry = new THREE.BoxGeometry(34, 1, 1);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(-43.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-    grid.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(-32.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-	grid.translateX(-21.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-	grid.translateX(-10.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-	grid.translateX(0.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 12);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-	grid.translateX(11.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(22.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-    grid.translateX(33.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
-
-    gridGeometry = new THREE.BoxGeometry(1, 1, 34);
-	grid = new THREE.Mesh( gridGeometry, gridMaterial );
-	sceneGraph.add( grid );
-
-	grid.translateX(44.5).translateY(6.5).translateZ(0);
-    grid.castShadow = true;
-    grid.receiveShadow = true;
+	
+	makeBox(1,1,34,gridMaterial,-43.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,-32.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,-21.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,-10.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,0.5,6.5,0,sceneGraph);
+	makeBox(1,1,12,gridMaterial,11.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,22.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,33.5,6.5,0,sceneGraph);
+	makeBox(1,1,34,gridMaterial,44.5,6.5,0,sceneGraph);
 
     // ************************** //
     // Create Safe Spots
@@ -489,4 +346,6 @@ function computeFrame(time) {
 
     requestAnimationFrame(computeFrame);
 }
+
+
 
