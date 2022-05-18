@@ -47,17 +47,17 @@ function onDocumentKeyDown(event) {
 }
 function onDocumentKeyUp(event) {
     switch (event.keyCode) {
-        case 68: //d
-            keyD = false;
+	case 87: //w
+            keyW = false;
             break;
-        case 83: //s
-            keyS = false;
-            break;
-        case 65: //a
+	case 65: //a
             keyA = false;
             break;
-        case 87: //w
-            keyW = false;
+	case 83: //s
+            keyS = false;
+            break;
+        case 68: //d
+            keyD = false;
             break;
     }
 }
@@ -96,17 +96,17 @@ function onDocumentKeyDown(event) {
                 key3 = false;
             }
             break;
-		case 68: //d
-            keyD = true;
+	case 87: //w
+            keyW = true;
             break;
-        case 83: //s
-            keyS = true;
-            break;
-        case 65: //a
+        case 65: //s
             keyA = true;
             break;
-        case 87: //w
-            keyW = true;
+        case 83: //a
+            keyS = true;
+            break;
+        case 68: //d
+            keyD = true;
             break;
     }
 }
