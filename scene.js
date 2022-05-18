@@ -8,6 +8,7 @@ const sceneElements = {
 };
 
 var key1 = false, key2 = false, key3 = false, key4 = false, turn = 0, rand = 0;
+var keyD = false, keyA = false, keyS = false, keyW = false;
 
 helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
@@ -16,6 +17,7 @@ requestAnimationFrame(computeFrame);
 // Event Listeners
 window.addEventListener('resize', resizeWindow);
 document.addEventListener('keydown', onDocumentKeyDown, false);
+document.addEventListener('keyup', onDocumentKeyUp, false);
 
 function resizeWindow(eventParam) {
     const width = window.innerWidth;
@@ -27,6 +29,38 @@ function resizeWindow(eventParam) {
     sceneElements.renderer.setSize(width, height);
 }
 
+function onDocumentKeyDown(event) {
+    switch (event.keyCode) {
+        case 68: //d
+            keyD = true;
+            break;
+        case 83: //s
+            keyS = true;
+            break;
+        case 65: //a
+            keyA = true;
+            break;
+        case 87: //w
+            keyW = true;
+            break;
+    }
+}
+function onDocumentKeyUp(event) {
+    switch (event.keyCode) {
+        case 68: //d
+            keyD = false;
+            break;
+        case 83: //s
+            keyS = false;
+            break;
+        case 65: //a
+            keyA = false;
+            break;
+        case 87: //w
+            keyW = false;
+            break;
+    }
+}
 function onDocumentKeyDown(event) {
     var p = sceneElements.sceneGraph.getObjectByName("gray");
     var q = sceneElements.sceneGraph.getObjectByName("blue");
@@ -61,6 +95,18 @@ function onDocumentKeyDown(event) {
                 }
                 key3 = false;
             }
+            break;
+		case 68: //d
+            keyD = true;
+            break;
+        case 83: //s
+            keyS = true;
+            break;
+        case 65: //a
+            keyA = true;
+            break;
+        case 87: //w
+            keyW = true;
             break;
     }
 }
@@ -190,8 +236,8 @@ function load3DObjects(sceneGraph) {
     table.translateX(0).translateY(-5.1).translateZ(0);
     table.receiveShadow = true;
 	
-	makeBox(25,14,300,tableMaterial,-136.5,-3.1,0,sceneGraph);
 	makeBox(25,14,300,tableMaterial,136.5,-3.1,0,sceneGraph);
+	makeBox(25,14,300,tableMaterial,-136.5,-3.1,0,sceneGraph);
 	makeBox(250,14,35,tableMaterial,0,-3.1,-132.5,sceneGraph);
 	makeBox(250,14,35,tableMaterial,0,-3.1,132.5,sceneGraph);
 
@@ -339,6 +385,21 @@ function load3DObjects(sceneGraph) {
 }
 
 function computeFrame(time) {
+	
+	const cube = sceneElements.sceneGraph.getObjectByName("turn");
+
+    if (keyD && cube.position.x < -50) {
+        cube.translateX(0.2);
+    }
+    if (keyW && cube.position.z > -100) {
+        cube.translateZ(-0.2 );
+    }
+    if (keyA && cube.position.x > -100) {
+        cube.translateX(-0.2 );
+    }
+    if (keyS && cube.position.z < 100) {
+        cube.translateZ(0.2 );
+    }
 
     helper.render(sceneElements);
 
@@ -346,6 +407,5 @@ function computeFrame(time) {
 
     requestAnimationFrame(computeFrame);
 }
-
 
 
