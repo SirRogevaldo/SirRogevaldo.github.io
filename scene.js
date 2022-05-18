@@ -164,7 +164,6 @@ function load3DObjects(sceneGraph) {
     var planeGeometry = new THREE.BoxGeometry( 250,0.1, 250 );
     var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x35654D} );
     var plane = new THREE.Mesh( planeGeometry, planeMaterial );
-    //plane.rotateOnAxis(new THREE.Vector3(1, 0, 0), Math.PI / 2);
     plane.translateX(0).translateY(-0.05).translateZ(0);
     sceneGraph.add( plane );
 
@@ -192,6 +191,7 @@ function load3DObjects(sceneGraph) {
     table.receiveShadow = true;
 	
 	makeBox(25,14,300,tableMaterial,-136.5,-3.1,0,sceneGraph);
+	makeBox(25,14,300,tableMaterial,136.5,-3.1,0,sceneGraph);
 	makeBox(250,14,35,tableMaterial,0,-3.1,-132.5,sceneGraph);
 	makeBox(250,14,35,tableMaterial,0,-3.1,132.5,sceneGraph);
 
