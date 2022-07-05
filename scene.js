@@ -1,4 +1,3 @@
-"use strict";
 
 const sceneElements = {
     sceneGraph: null,
@@ -7,6 +6,7 @@ const sceneElements = {
     renderer: null,
 };
 
+
 var key1 = false, key2 = false, key3 = false, key4 = false, turn = 0, rand = 0;
 var keyD = false, keyA = false, keyS = false, keyW = false;
 
@@ -14,10 +14,17 @@ helper.initEmptyScene(sceneElements);
 load3DObjects(sceneElements.sceneGraph);
 requestAnimationFrame(computeFrame);
 
+// Setup Raycaster
+const ray = new THREE.Raycaster();
+const pointer = new THREE.Vector3();
+
 // Event Listeners
 window.addEventListener('resize', resizeWindow);
+window.addEventListener('mousemove', onMouseMove);
+document.addEventListener('mousedown', onDocumentMouseDown, false);
 document.addEventListener('keydown', onDocumentKeyDown, false);
 document.addEventListener('keyup', onDocumentKeyUp, false);
+
 
 function resizeWindow(eventParam) {
     const width = window.innerWidth;
@@ -29,31 +36,22 @@ function resizeWindow(eventParam) {
     sceneElements.renderer.setSize(width, height);
 }
 
-function onDocumentKeyDown(event) {
-    switch (event.keyCode) {
-        case 68: //d
-            keyD = true;
-            break;
-        case 83: //s
-            keyS = true;
-            break;
-        case 65: //a
-            keyA = true;
-            break;
-        case 87: //w
-            keyW = true;
-            break;
-    }
+function onMouseMove(event) {
+
+    pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+    pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
 }
+
 function onDocumentKeyUp(event) {
     switch (event.keyCode) {
-	case 87: //w
+        case 87: //w
             keyW = false;
             break;
-	case 65: //a
+        case 65: //a
             keyA = false;
             break;
-	case 83: //s
+        case 83: //s
             keyS = false;
             break;
         case 68: //d
@@ -61,6 +59,28 @@ function onDocumentKeyUp(event) {
             break;
     }
 }
+
+function hoverPieces() {
+    ray.setFromCamera(pointer, sceneElements.camera);
+    var intersect = ray.intersectObjects(sceneElements.sceneGraph.children);
+
+    if (intersect.length > 0) {
+
+        //if ((intersect[0].object.material.color == "0xaaaaaa" && turn == 0) || (intersect[0].object.material.color == "0x660000" && turn == 1)) {
+        intersect[0].object.material.transparent = true;
+        intersect[0].object.material.opacity = 0.5;
+        //}
+    }
+}
+
+function resetPieces() {
+    for (let i = 0; i < sceneElements.sceneGraph.children.length; i++) {
+        if (sceneElements.sceneGraph.children[i].material) {
+            sceneElements.sceneGraph.children[i].material.opacity = 1.0;
+        }
+    }
+}
+
 function onDocumentKeyDown(event) {
     var p = sceneElements.sceneGraph.getObjectByName("gray");
     var q = sceneElements.sceneGraph.getObjectByName("blue");
@@ -68,35 +88,35 @@ function onDocumentKeyDown(event) {
 
     switch (event.keyCode) {
         case 49: //1
-            if(turn == 0){
+            if (turn == 0) {
                 key1 = true;
-                rand = Math.round(Math.random()*4);
-                moveGray(rand,p,q);
+                rand = Math.round(Math.random() * 4);
+                moveGray(rand, p, q);
                 turn = 1;
                 r.material.color.setHex(0x000066);
-                if(p.pos == 4 || p.pos == 8 || p.pos == 14){
+                if (p.pos == 4 || p.pos == 8 || p.pos == 14) {
                     turn = 0;
                     r.material.color.setHex(0xaaaaaa);
                 }
-                
-                key1 = false;  
+
+                key1 = false;
             }
             break;
         case 51: //3
-            if(turn == 1){
+            if (turn == 1) {
                 key3 = true;
-                rand = Math.round(Math.random()*4);
-                moveBlue(rand,q,p);
+                rand = Math.round(Math.random() * 4);
+                moveBlue(rand, q, p);
                 turn = 0;
                 r.material.color.setHex(0xaaaaaa);
-                if(q.pos == 4 || q.pos == 8 || q.pos == 14){
+                if (q.pos == 4 || q.pos == 8 || q.pos == 14) {
                     turn = 1;
                     r.material.color.setHex(0x000066);
                 }
                 key3 = false;
             }
             break;
-	case 87: //w
+        case 87: //w
             keyW = true;
             break;
         case 65: //s
@@ -111,8 +131,8 @@ function onDocumentKeyDown(event) {
     }
 }
 
-function collisionBlueTest(p,q){
-    if(p.pos == q.pos && p.pos > 4 && q.pos < 13){
+function collisionBlueTest(p, q) {
+    if (p.pos == q.pos && p.pos > 4 && q.pos < 13) {
         q.position.x = 6;
         q.position.y = 1;
         q.position.z = -11;
@@ -120,237 +140,166 @@ function collisionBlueTest(p,q){
     }
 }
 
-function collisionGrayTest(p,q){
-    if(p.pos == q.pos && p.pos > 4 && q.pos < 13){
+function collisionGrayTest(p, q) {
+    if (p.pos == q.pos && p.pos > 4 && q.pos < 13) {
         q.position.x = 6;
         q.position.y = 1;
         q.position.z = 11;
         q.pos = 0;
-        
+
     }
 }
 
-function moveGray(spaces,p,q){
-    if(p.pos + spaces > 15 || (p.pos + spaces == 8 && q.pos == 8))
-        return;
+function onDocumentMouseDown(event) {
 
-    var i = 0;
-    while(i < spaces){
-        if(p.pos + i == 0){
-            p.translateX(-11).translateY(6);
-        }
-        else if((p.pos + i  > 0 && p.pos + i < 4) || (p.pos + i > 12 && p.pos + i < 14)){
-            p.translateX(-11);  
-        }
-        else if(p.pos + i == 4){
-            p.translateZ(-11);
-        }
-        else if(p.pos + i > 4 && p.pos + i < 12){
-            p.translateX(11);
-        }
-        else if(p.pos + i == 12){
-            p.translateZ(11);
-        }
-        else if(p.pos + i == 14){
-            p.translateX(-11).translateY(-6);
-        }
-        i++;
+    // direction from the camera
+    var vector = new THREE.Vector3((event.clientX / window.innerWidth) * 2 - 1, -(event.clientY / window.innerHeight) * 2 + 1, 0.5);
+    vector = vector.unproject(sceneElements.camera);
+
+    var raycaster = new THREE.Raycaster(sceneElements.camera.position, vector.sub(sceneElements.camera.position).normalize());
+
+    var intersects = raycaster.intersectObjects(sceneElements.sceneGraph.children);
+
+    if (intersects.length > 0) {
+
+        //if ((intersects[0].object.name == "gray" && turn == 0) || (intersects[0].object.name == "blue" && turn == 1)) {
+        intersects[0].object.material.transparent = true;
+        intersects[0].object.material.opacity = 0.5;
+        //}
+        //console.log(turn); // mostra nome
     }
-    p.pos += spaces;
-    collisionBlueTest(p,q);
+
 }
 
-function moveBlue(spaces,p,q){
-    if(p.pos + spaces > 15 || (p.pos + spaces == 8 && q.pos == 8))
+function moveGray(spaces, p, q) {
+    if (p.pos + spaces > 15 || (p.pos + spaces == 8 && q.pos == 8))
         return;
 
     var i = 0;
-    while(i < spaces){
-        if(p.pos + i == 0){
+    while (i < spaces) {
+        if (p.pos + i == 0) {
             p.translateX(-11).translateY(6);
         }
-        else if((p.pos + i  > 0 && p.pos + i < 4) || (p.pos + i > 12 && p.pos + i < 14)){
+        else if ((p.pos + i > 0 && p.pos + i < 4) || (p.pos + i > 12 && p.pos + i < 14)) {
             p.translateX(-11);
         }
-        else if(p.pos + i == 4){
-            p.translateZ(11);
-        }
-        else if(p.pos + i > 4 && p.pos + i < 12){
-            p.translateX(11);
-        }
-        else if(p.pos + i == 12){
+        else if (p.pos + i == 4) {
             p.translateZ(-11);
         }
-        else if(p.pos + i == 14){
+        else if (p.pos + i > 4 && p.pos + i < 12) {
+            p.translateX(11);
+        }
+        else if (p.pos + i == 12) {
+            p.translateZ(11);
+        }
+        else if (p.pos + i == 14) {
             p.translateX(-11).translateY(-6);
         }
         i++;
     }
     p.pos += spaces;
-    collisionGrayTest(p,q);   
+    collisionBlueTest(p, q);
 }
 
-function makeBox(width,height,depth,material,x,y,z,obj){
-	var boardGeometry = new THREE.BoxGeometry(width, height, depth);
-    var board = new THREE.Mesh( boardGeometry, material );
-	
-	board.translateX(x).translateY(y).translateZ(z);
-    board.castShadow = true;
-    board.receiveShadow = true;
-	
-    obj.add(board);
+function moveBlue(spaces, p, q) {
+    if (p.pos + spaces > 15 || (p.pos + spaces == 8 && q.pos == 8))
+        return;
+
+    var i = 0;
+    while (i < spaces) {
+        if (p.pos + i == 0) {
+            p.translateX(-11).translateY(6);
+        }
+        else if ((p.pos + i > 0 && p.pos + i < 4) || (p.pos + i > 12 && p.pos + i < 14)) {
+            p.translateX(-11);
+        }
+        else if (p.pos + i == 4) {
+            p.translateZ(11);
+        }
+        else if (p.pos + i > 4 && p.pos + i < 12) {
+            p.translateX(11);
+        }
+        else if (p.pos + i == 12) {
+            p.translateZ(-11);
+        }
+        else if (p.pos + i == 14) {
+            p.translateX(-11).translateY(-6);
+        }
+        i++;
+    }
+    p.pos += spaces;
+    collisionGrayTest(p, q);
 }
 
 function load3DObjects(sceneGraph) {
 
     // ************************** //
-    // Create the Plane
-    // ************************** //
-	
-    var planeGeometry = new THREE.BoxGeometry( 250,0.1, 250 );
-    var planeMaterial = new THREE.MeshPhongMaterial( {color: 0x35654D} );
-    var plane = new THREE.Mesh( planeGeometry, planeMaterial );
-    plane.translateX(0).translateY(-0.05).translateZ(0);
-    sceneGraph.add( plane );
-
-    plane.receiveShadow = true;
-	
-    // ************************** //
     // Create the Board (Bottom)
-    // ************************** //
+    const board = createBoard();
+    sceneGraph.add(board);
 
-    var boardMaterial = new THREE.MeshPhongMaterial( {color: 0x98633B} );
-	makeBox(45,6,34,boardMaterial,-21.5,3,0,sceneGraph);
-	makeBox(21,6,12,boardMaterial,11.5,3,0,sceneGraph);
-	makeBox(23,6,34,boardMaterial,33.5,3,0,sceneGraph);
+    // ************************** //
+    // Create the Plane
+    const plane = createPlane(250);
+    board.add(plane);
+    sceneGraph.add(board);
 
     // ************************** //
     // Create the TABLE 
-    // ************************** //
-	
-    var tableGeometry = new THREE.BoxGeometry(250, 10, 250);
-    var tableMaterial = new THREE.MeshPhongMaterial( {color: 0x764119} );
-    var table = new THREE.Mesh( tableGeometry, tableMaterial );
+
+    const table = createTable();
     sceneGraph.add(table);
 
-    table.translateX(0).translateY(-5.1).translateZ(0);
-    table.receiveShadow = true;
-	
-	makeBox(25,14,300,tableMaterial,136.5,-3.1,0,sceneGraph);
-	makeBox(25,14,300,tableMaterial,-136.5,-3.1,0,sceneGraph);
-	makeBox(250,14,35,tableMaterial,0,-3.1,-132.5,sceneGraph);
-	makeBox(250,14,35,tableMaterial,0,-3.1,132.5,sceneGraph);
-
-    var tableGeometry = new THREE.CylinderGeometry( 20, 10, 200, 4 );
-    var leg = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add( leg );
-
-    leg.translateX(132.5).translateY(-104.5).translateZ(132.5);
-    leg.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    leg.castShadow = true;
-    leg.receiveShadow = true;
-
-    var tableGeometry = new THREE.CylinderGeometry( 20, 10, 200, 4 );
-    var leg = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add( leg );
-
-    leg.translateX(-132.5).translateY(-104.5).translateZ(132.5);
-    leg.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    leg.castShadow = true;
-    leg.receiveShadow = true;
-
-    var tableGeometry = new THREE.CylinderGeometry( 20, 10, 200, 4 );
-    var leg = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add( leg );
-
-    leg.translateX(132.5).translateY(-104.5).translateZ(-132.5);
-    leg.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    leg.castShadow = true;
-    leg.receiveShadow = true;
-
-    var tableGeometry = new THREE.CylinderGeometry( 20, 10, 200, 4 );
-    var leg = new THREE.Mesh( tableGeometry, tableMaterial );
-    sceneGraph.add( leg );
-
-    leg.translateX(-132.5).translateY(-104.5).translateZ(-132.5);
-    leg.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    leg.castShadow = true;
-    leg.receiveShadow = true;
-
     // ************************** //
-    // Create the Board (Grid)
-    // ************************** //
-
-	var gridMaterial = new THREE.MeshPhongMaterial( {color: 0xDEB886} );
-	makeBox(44,1,1,gridMaterial,-21.5,6.5,-16.5,sceneGraph);
-	makeBox(44,1,1,gridMaterial,-21.5,6.5,16.5,sceneGraph);
-	makeBox(88,1,1,gridMaterial,0,6.5,-5.5,sceneGraph);
-	makeBox(88,1,1,gridMaterial,0,6.5,5.5,sceneGraph);
-	makeBox(23,1,1,gridMaterial,33.5,6.5,-16.5,sceneGraph);
-	makeBox(23,1,1,gridMaterial,33.5,6.5,16.5,sceneGraph);
-
-    // vertical lines
-	
-	makeBox(1,1,34,gridMaterial,-43.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,-32.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,-21.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,-10.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,0.5,6.5,0,sceneGraph);
-	makeBox(1,1,12,gridMaterial,11.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,22.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,33.5,6.5,0,sceneGraph);
-	makeBox(1,1,34,gridMaterial,44.5,6.5,0,sceneGraph);
-
-    // ************************** //
-    // Create Safe Spots
-    // ************************** //
+    // Create rosetta Spaces
+    const rosetta = new THREE.Group();
 
     var safeGeometry = new THREE.BoxGeometry(5, 1, 5);
-	var safeMaterial = new THREE.MeshPhongMaterial( {color: 0x660000} );
-	var safe = new THREE.Mesh( safeGeometry, safeMaterial );
-	sceneGraph.add( safe );
+    var safeMaterial = new THREE.MeshPhongMaterial({ color: 0x660000 });
+    var safe = new THREE.Mesh(safeGeometry, safeMaterial);
+    rosetta.add(safe);
 
     safe.translateX(-38).translateY(6.2).translateZ(11);
     safe.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
-    
+
     var safeGeometry = new THREE.BoxGeometry(5, 1, 5);
-	var safe = new THREE.Mesh( safeGeometry, safeMaterial );
-	sceneGraph.add( safe );
+    var safe = new THREE.Mesh(safeGeometry, safeMaterial);
+    rosetta.add(safe);
 
     safe.translateX(-38).translateY(6.2).translateZ(-11);
     safe.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
 
     var safeGeometry = new THREE.BoxGeometry(5, 1, 5);
-	var safe = new THREE.Mesh( safeGeometry, safeMaterial );
-	sceneGraph.add( safe );
+    var safe = new THREE.Mesh(safeGeometry, safeMaterial);
+    rosetta.add(safe);
 
     safe.translateX(28).translateY(6.2).translateZ(-11);
     safe.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
 
     var safeGeometry = new THREE.BoxGeometry(5, 1, 5);
-	var safe = new THREE.Mesh( safeGeometry, safeMaterial );
-	sceneGraph.add( safe );
+    var safe = new THREE.Mesh(safeGeometry, safeMaterial);
+    rosetta.add(safe);
 
-   
+
     safe.translateX(28).translateY(6.2).translateZ(11);
     safe.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
 
     var safeGeometry = new THREE.BoxGeometry(5, 1, 5);
-	var safe = new THREE.Mesh( safeGeometry, safeMaterial );
-	sceneGraph.add( safe );
+    var safe = new THREE.Mesh(safeGeometry, safeMaterial);
+    rosetta.add(safe);
 
-    
+
     safe.translateX(-5).translateY(6.2).translateZ(0);
     safe.rotateOnAxis(new THREE.Vector3(0, 1, 0), Math.PI / 4);
 
+    sceneGraph.add(rosetta);
+
     // ************************** //
     // Create the Pieces
-    // ************************** //
-
-    var pieceGeometry = new THREE.CylinderGeometry( 3.5, 3.5, 2, 64 );
-    var pieceMaterial = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
-    var grayPiece = new THREE.Mesh( pieceGeometry, pieceMaterial );
-    sceneGraph.add( grayPiece );
+    var pieceGeometry = new THREE.CylinderGeometry(3.5, 3.5, 2, 64);
+    var pieceMaterial = new THREE.MeshPhongMaterial({ color: 0xaaaaaa });
+    var grayPiece = new THREE.Mesh(pieceGeometry, pieceMaterial);
+    sceneGraph.add(grayPiece);
 
     grayPiece.translateX(6).translateY(1).translateZ(11);
     grayPiece.castShadow = true;
@@ -359,10 +308,10 @@ function load3DObjects(sceneGraph) {
     grayPiece.name = "gray";
     grayPiece.pos = 0;
 
-    var pieceGeometry = new THREE.CylinderGeometry( 3.5, 3.5, 2, 64 );
-    var pieceMaterial = new THREE.MeshLambertMaterial( {color: 0x000066} );
-    var bluePiece = new THREE.Mesh( pieceGeometry, pieceMaterial );
-    sceneGraph.add( bluePiece );
+    var pieceGeometry = new THREE.CylinderGeometry(3.5, 3.5, 2, 64);
+    var pieceMaterial = new THREE.MeshLambertMaterial({ color: 0x000066 });
+    var bluePiece = new THREE.Mesh(pieceGeometry, pieceMaterial);
+    sceneGraph.add(bluePiece);
 
     bluePiece.translateX(6).translateY(1).translateZ(-11);
     bluePiece.castShadow = true;
@@ -376,36 +325,39 @@ function load3DObjects(sceneGraph) {
     // ************************** //
 
     var turnGeometry = new THREE.BoxGeometry(10, 6, 10);
-	var turnMaterial = new THREE.MeshPhongMaterial( {color: 0xaaaaaa} );
-	var turn = new THREE.Mesh( turnGeometry, turnMaterial );
-	sceneGraph.add( turn );
+    var turnMaterial = new THREE.MeshPhongMaterial({ color: 0xaaaaaa });
+    var turn = new THREE.Mesh(turnGeometry, turnMaterial);
+    sceneGraph.add(turn);
 
     turn.translateX(-60).translateY(3).translateZ(0);
     turn.name = "turn";
 }
 
 function computeFrame(time) {
-	
-	const cube = sceneElements.sceneGraph.getObjectByName("turn");
+
+    const cube = sceneElements.sceneGraph.getObjectByName("turn");
+
+    resetPieces();
+    hoverPieces();
+
 
     if (keyD && cube.position.x < -50) {
         cube.translateX(0.2);
     }
     if (keyW && cube.position.z > -100) {
-        cube.translateZ(-0.2 );
+        cube.translateZ(-0.2);
     }
     if (keyA && cube.position.x > -100) {
-        cube.translateX(-0.2 );
+        cube.translateX(-0.2);
     }
     if (keyS && cube.position.z < 100) {
-        cube.translateZ(0.2 );
+        cube.translateZ(0.2);
     }
 
     helper.render(sceneElements);
+    //renderer.render(sceneElements.sceneGraph, sceneElements.camera);
 
     sceneElements.control.update();
 
     requestAnimationFrame(computeFrame);
-}
-
-
+} 
